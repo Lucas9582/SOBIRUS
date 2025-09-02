@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "199931538799",
+    "project_id": "sobriusapp",
+    "storage_bucket": "sobriusapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:199931538799:android:2152140a3e8833e8928c9a",
+        "android_client_info": {
+          "package_name": "com.company.sobrius"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "199931538799-fg73vs48rmma32eugkfqqpndhoc2631v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCI-88G8gbTt_l00q46S-vS_jRCpn4c1JE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "199931538799-fg73vs48rmma32eugkfqqpndhoc2631v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
