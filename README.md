@@ -72,7 +72,7 @@ Somos apaixonados por melhorar o Sobrius e agradecemos as contribuições da com
 
 ## 📧 Contato
 
-Para suporte, parcerias ou questões gerais, entre em contato conosco através de:
+Para suporte, parcerias ou questões gerais, entre em contato conosco através de;
 
 * **Email:** support@sobriusapp.com
 
