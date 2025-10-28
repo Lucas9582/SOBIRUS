@@ -1,11 +1,5 @@
 # 🌟 SOBRIUS - Aplicativo de Recuperação de Vícios
 
-## 📋 Informações do Projeto
-
-**Instituição:** Universidade  
-**Disciplina:** Programação Orientada a Objetos  
-**Período:** 2024/2025
-
 ### 👥 Integrantes
 - Breno Vinícius de Carvalho Filho - 12300934
 - Lincoln Sales e Gonçalves - 12400289
