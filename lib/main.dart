@@ -22,14 +22,19 @@ import 'package:sobrius_app/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print('Erro ao inicializar Firebase: $e');
+  }
 
   final profileService = ProfileService();
   final profileRepository = ProfileRepository(service: profileService);
   final relapseService = RelapseService();
-  final relapseRepository = RelapseRepository(service: relapseService); // Corrigido aqui: uso do parâmetro nomeado 'service'
+  final relapseRepository = RelapseRepository(service: relapseService);
 
   runApp(
     MultiProvider(
