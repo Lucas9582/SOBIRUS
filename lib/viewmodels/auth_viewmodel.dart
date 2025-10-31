@@ -1,46 +1,54 @@
-// lib/features/auth/presentation/viewmodels/auth_viewmodel.dart
+// lib/viewmodels/auth_viewmodel.dart
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-//import 'package:google_sign_in/google_sign_in.dart'; // Importe para o Google Sign-In
-import 'package:sobrius_app/features/profile_repository.dart'; // Importe o ProfileRepository
+import 'package:sobrius_app/features/profile_repository.dart';
 
 class AuthViewModel with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  //final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final ProfileRepository _profileRepository; // Injetar o ProfileRepository
+  final ProfileRepository _profileRepository;
   
-  // Future que indica que a autenticação está pronta
   late final Future<void> authReady;
 
   User? _currentUser;
   String? _errorMessage;
   bool _isLoading = false;
 
-  AuthViewModel(this._profileRepository) { // Construtor que recebe o ProfileRepository
-    // Escuta as mudanças no estado de autenticação do Firebase
+  AuthViewModel(this._profileRepository) {
     authReady = _initializeAuth();
   }
   
   Future<void> _initializeAuth() async {
-    await _auth.authStateChanges().first;
-    _currentUser = _auth.currentUser;
-    notifyListeners();
-    _auth.authStateChanges().listen((User? user) {
-      _currentUser = user;
+    try {
+      _currentUser = _auth.currentUser;
       notifyListeners();
-    });
+      
+      await _auth.authStateChanges()
+          .first
+          .timeout(
+            const Duration(seconds: 3),
+            onTimeout: () => _auth.currentUser,
+          );
+      
+      _currentUser = _auth.currentUser;
+      notifyListeners();
+      
+      _auth.authStateChanges().listen((User? user) {
+        _currentUser = user;
+        notifyListeners();
+      });
+    } catch (e) {
+      print('Erro ao inicializar autenticação: $e');
+      _currentUser = _auth.currentUser;
+      notifyListeners();
+    }
   }
 
-  // --- Getters para o estado da UI ---
   bool get isAuthenticated => _currentUser != null;
   User? get currentUser => _currentUser;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
 
-  // --- Métodos de Autenticação ---
-
-  /// Autentica um usuário com e-mail e senha.
   Future<void> signInWithEmailPassword(String email, String password) async {
     _setLoading(true);
     _setErrorMessage(null);
@@ -55,7 +63,6 @@ class AuthViewModel with ChangeNotifier {
     }
   }
 
-  /// Cria um novo usuário com e-mail e senha.
   Future<void> signUpWithEmailAndPassword(String email, String password) async {
     _setLoading(true);
     _setErrorMessage(null);
@@ -70,34 +77,6 @@ class AuthViewModel with ChangeNotifier {
     }
   }
 
-  /// Autentica um usuário usando a conta do Google.
-/*  Future<void> signInWithGoogle() async {
-    _setLoading(true);
-    _setErrorMessage(null);
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        _setErrorMessage('Login com Google cancelado.');
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await _auth.signInWithCredential(credential);
-    } on FirebaseAuthException catch (e) {
-      _setErrorMessage(_mapFirebaseAuthExceptionMessage(e.code));
-    } catch (e) {
-      _setErrorMessage("Erro ao entrar com Google: $e");
-    } finally {
-      _setLoading(false);
-    }
-  }
-*/
-  /// Envia um e-mail para redefinir a senha do usuário.
   Future<void> resetPassword(String email) async {
     _setLoading(true);
     _setErrorMessage(null);
@@ -113,13 +92,11 @@ class AuthViewModel with ChangeNotifier {
     }
   }
 
-  /// Realiza o logout do usuário.
   Future<void> signOut() async {
     _setLoading(true);
     _setErrorMessage(null);
     try {
       await _auth.signOut();
-//      await _googleSignIn.signOut(); // Adiciona logout do Google
     } catch (e) {
       _setErrorMessage("Erro ao fazer logout: $e");
     } finally {
@@ -127,31 +104,35 @@ class AuthViewModel with ChangeNotifier {
     }
   }
 
-  // NOVO MÉTODO: Verificar se o perfil já existe
   Future<bool> doesProfileExist() async {
     if (_currentUser == null) {
-      return false; // Se não há usuário logado, não há perfil.
+      return false;
     }
-    // Usa o ProfileRepository para verificar
-    final profile = await _profileRepository.fetchProfile(userId: _currentUser!.uid);
-    return profile != null;
+    
+    try {
+      final profile = await _profileRepository
+          .fetchProfile(userId: _currentUser!.uid)
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => null,
+          );
+      return profile != null;
+    } catch (e) {
+      print('Erro ao verificar perfil: $e');
+      return false;
+    }
   }
 
-  // --- Métodos Auxiliares ---
-
-  /// Atualiza o estado de carregamento e notifica os listeners.
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
   }
 
-  /// Atualiza a mensagem de erro e notifica os listeners.
   void _setErrorMessage(String? message) {
     _errorMessage = message;
     notifyListeners();
   }
 
-  /// Mapeia códigos de erro do Firebase para mensagens amigáveis.
   String _mapFirebaseAuthExceptionMessage(String errorCode) {
     switch (errorCode) {
       case 'user-not-found':
@@ -171,3 +152,19 @@ class AuthViewModel with ChangeNotifier {
     }
   }
 }
+```
+
+---
+
+## ✅ CHECKLIST FINAL
+```
+□ Copiei o código do ARQUIVO 1 (main.dart)
+□ Colei no meu lib/main.dart
+□ Salvei o arquivo
+□ Copiei o código do ARQUIVO 2 (auth_viewmodel.dart)
+□ Colei no meu lib/viewmodels/auth_viewmodel.dart
+□ Salvei o arquivo
+□ Executei: flutter clean
+□ Executei: flutter pub get
+□ Executei: flutter run
+□ Testei o app!
