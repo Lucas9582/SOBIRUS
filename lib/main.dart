@@ -1,5 +1,3 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -88,7 +86,18 @@ final _router = GoRouter(
       redirect: (context, state) async {
         final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
 
-        await authViewModel.authReady;
+        try {
+          await authViewModel.authReady.timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              print('Timeout na autenticação - redirecionando para login');
+              return;
+            },
+          );
+        } catch (e) {
+          print('Erro ao aguardar autenticação: $e');
+          return '/login';
+        }
 
         final loggedIn = authViewModel.isAuthenticated;
         final loggingIn = state.uri.path == '/login' || state.uri.path == '/signup';
@@ -97,18 +106,37 @@ final _router = GoRouter(
           return '/login';
         }
 
-        if (loggedIn && loggingIn) {
-          final profileExists = await authViewModel.doesProfileExist();
-          if (profileExists) {
-            return '/home';
+        if (loggedIn) {
+          if (loggingIn) {
+            try {
+              final profileExists = await authViewModel.doesProfileExist().timeout(
+                const Duration(seconds: 5),
+                onTimeout: () => false,
+              );
+              if (profileExists) {
+                return '/home';
+              }
+              return '/create_profile';
+            } catch (e) {
+              print('Erro ao verificar perfil: $e');
+              return '/create_profile';
+            }
           }
-          return '/create_profile';
         }
 
         return null;
       },
       builder: (context, state) => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Carregando...'),
+            ],
+          ),
+        ),
       ),
     ),
     GoRoute(
